@@ -1,4 +1,4 @@
-import com.android.build.api.dsl.Packaging
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -13,6 +13,7 @@ plugins {
 android {
     namespace = "com.herbarium"
     compileSdk = 35
+    android.buildFeatures.buildConfig = true
 
     defaultConfig {
         applicationId = "com.herbarium"
@@ -21,7 +22,14 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.herbarium.config.HiltRunner"
+
+        val properties = Properties()
+        properties.load(project.rootProject.file("supabase.properties").inputStream())
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${properties.getProperty("SUPABASE_ANON_KEY")}\"")
+        buildConfigField("String", "SUPABASE_URL", "\"${properties.getProperty("SUPABASE_URL")}\"")
+        buildConfigField("String", "SUPABASE_SECRET", "\"${properties.getProperty("SUPABASE_SECRET")}\"")
+
     }
 
     buildTypes {
@@ -114,4 +122,7 @@ dependencies {
     androidTestImplementation(libs.turbine) // For Flow testing
     androidTestImplementation(libs.truth) // Assertions
     androidTestImplementation(libs.dexmaker)
+
+    androidTestImplementation(libs.hilt.android.testing)
+    kaptAndroidTest(libs.hilt.android.compiler)
 }

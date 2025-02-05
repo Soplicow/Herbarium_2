@@ -1,15 +1,20 @@
 package com.herbarium.di
 
-import com.herbarium.data.remote.api.SupabaseApi
+import com.herbarium.BuildConfig
+import com.herbarium.data.remote.api.PlantRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.FlowType
+import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.storage.storage
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -20,17 +25,34 @@ object SupabaseModule {
     @Singleton
     fun provideSupabaseClient(): SupabaseClient {
         return createSupabaseClient(
-            supabaseUrl = "https://zwpanainvfxrarkhyokh.supabase.co",
-            supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3cGFuYWludmZ4cmFya2h5b2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0NDMzMzYsImV4cCI6MjA0ODAxOTMzNn0.ezzRcuUjVJnRLmzil5N928teAr3RMqrO1aD3dDOkUwM"
+            supabaseUrl = BuildConfig.SUPABASE_URL,
+            supabaseKey = BuildConfig.SUPABASE_ANON_KEY
         ) {
             install(Postgrest)
-            install(Auth)
+            install(Auth) {
+                flowType = FlowType.PKCE
+                scheme = "app"
+                host = "supabase.com"
+            }
             install(Storage)
         }
     }
 
     @Provides
-    fun provideSupabaseApi(supabaseClient: SupabaseClient): SupabaseApi {
-        return SupabaseApi(supabaseClient)
+    @Singleton
+    fun provideSupabaseDatabase(client: SupabaseClient): Postgrest {
+        return client.postgrest
+    }
+
+    @Provides
+    @Singleton
+    fun provideSupabaseAuth(client: SupabaseClient): Auth {
+        return client.auth
+    }
+
+    @Provides
+    @Singleton
+    fun provideSupabaseStorage(client: SupabaseClient): Storage {
+        return client.storage
     }
 }
