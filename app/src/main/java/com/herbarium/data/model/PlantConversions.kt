@@ -8,18 +8,20 @@ import kotlinx.serialization.json.JsonObject
 fun Plant.toPlantEntity(): PlantEntity {
     return PlantEntity(
         id = this.id,
+        name = this.name,
         userId = this.userId,
-        photoUrl = this.photoUrl,
+        photoUrl = "",
         description = this.description,
         location = this.location?.toString()
     )
 }
 
-fun PlantEntity.toPlant(): Plant {
+fun PlantEntity.toPlant(image: ByteArray): Plant {
     return Plant(
         id = this.id,
+        name = this.name,
         userId = this.userId,
-        photoUrl = this.photoUrl,
+        photo = TODO(),
         description = this.description,
         location = this.location?.let { Json.parseToJsonElement(it) as? JsonObject }
     )
@@ -28,18 +30,19 @@ fun PlantEntity.toPlant(): Plant {
 fun Plant.toPlantDto(): PlantDto {
     return PlantDto(
         id = this.id,
+        name = this.name,
         user_id = this.userId,
-        photo_url = this.photoUrl,
         description = this.description,
         location = this.location
     )
 }
 
-fun PlantDto.toPlant(): Plant {
+fun PlantDto.toPlant(image: ByteArray): Plant {
     return Plant(
         id = this.id,
+        name = this.name,
         userId = this.user_id,
-        photoUrl = this.photo_url,
+        photo = image,
         description = this.description,
         location = this.location
     )

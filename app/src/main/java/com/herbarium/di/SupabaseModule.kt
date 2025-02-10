@@ -1,7 +1,6 @@
 package com.herbarium.di
 
 import com.herbarium.BuildConfig
-import com.herbarium.data.remote.api.PlantRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

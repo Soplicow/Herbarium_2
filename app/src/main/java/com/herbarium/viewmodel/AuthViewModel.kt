@@ -18,18 +18,18 @@ class AuthViewModel @Inject constructor(
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState
 
-    fun signIn(email: String, password: String) {
-        viewModelScope.launch {
-            _authState.value = AuthState.Loading
-            authRepository.signIn(email, password)
-                .onSuccess { user ->
-                    _authState.value = AuthState.Success(user)
-                }
-                .onFailure { e ->
-                    _authState.value = AuthState.Error(e.message ?: "Unknown error")
-                }
-        }
-    }
+//    fun signIn(email: String, password: String) {
+//        viewModelScope.launch {
+//            _authState.value = AuthState.Loading
+//            authRepository.signIn(email, password)
+//                .onSuccess { user ->
+//                    _authState.value = AuthState.Success(user)
+//                }
+//                .onFailure { e ->
+//                    _authState.value = AuthState.Error(e.message ?: "Unknown error")
+//                }
+//        }
+//    }
 
     // Similar logic for signUp and signOut
 }

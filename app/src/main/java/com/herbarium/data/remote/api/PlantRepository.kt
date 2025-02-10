@@ -1,20 +1,25 @@
 package com.herbarium.data.remote.api
 
+import com.herbarium.BuildConfig
 import com.herbarium.data.model.Plant
+import com.herbarium.data.model.toPlant
 import com.herbarium.data.model.toPlantDto
 import com.herbarium.data.remote.dto.PlantDto
-import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.storage.Storage
+import io.github.jan.supabase.storage.update
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class PlantRepository @Inject constructor (
     private val postgrest: Postgrest,
     private val storage: Storage,
+    private val auth: Auth
 ): IPlantRepository {
     override suspend fun getPlantsByUser(userId: String): List<PlantDto> {
         return withContext(Dispatchers.IO) {
@@ -27,38 +32,139 @@ class PlantRepository @Inject constructor (
         }
     }
 
-    override suspend fun insertPlant(plant: Plant): PlantDto {
+    suspend fun List<PlantDto>.listPlants(): List<Plant> = coroutineScope {
+//        val plants = mutableListOf<Plant>()
+//        for (plant in this) {
+//            try {
+//                withContext(Dispatchers.IO) {
+//                    val image = storage.from("plant_images").downloadAuthenticated(
+//                        path = "${plant.user_id}/${plant.id}.png",
+//                    )
+//                    plants.add(plant.toPlant(image))
+//                }
+//            } catch (e: Exception) {
+//                throw e
+//            }
+//        }
+//        return plants
+        map { plant ->
+            async { // Process downloads in parallel
+                try {
+                    val image = storage.from("plant_images")
+                        .downloadAuthenticated("${plant.user_id}/${plant.id}.png")
+                    plant.toPlant(image)
+                } catch (e: Exception) {
+                    null // Handle errors gracefully (e.g., log and return null)
+                }
+            }
+        }.awaitAll().filterNotNull()
+    }
+
+    suspend fun getDomainPlants(userId: String): List<Plant> {
+        return getPlantsByUser(userId).listPlants()
+    } // TODO: This will probably break, but worth a try
+
+    suspend fun getPlantById(plantId: String): Plant? {
+        val image: ByteArray
+        val plant: Plant?
+        withContext(Dispatchers.IO) {
+            val plantDto = postgrest.from("plants")
+               .select {
+                    filter {
+                        eq("id", plantId)
+                    }
+                }
+               .decodeSingleOrNull<PlantDto>()
+
+            if (plantDto!= null) {
+                image = storage.from("plant_images").downloadAuthenticated(
+                    path = "${plantDto.user_id}/${plantDto.id}.png",
+                )
+                plant = plantDto.toPlant(image)
+                return@withContext plant
+            } else {
+                return@withContext null
+            }
+        }
+        return null
+    }
+
+    override suspend fun insertPlant(plant: Plant): Boolean {
+        val image = plant.photo
         val newPlant = plant.toPlantDto()
-        return withContext(Dispatchers.IO) {
-            postgrest.from("plants")
-                .insert(newPlant)
-                .decodeSingle<PlantDto>()
+        return try {
+            withContext(Dispatchers.IO) {
+                postgrest.from("plants")
+                    .insert(newPlant)
+
+                if (image != null){
+                    storage.from("plant_images").upload(
+                        path = "${newPlant.user_id}/${plant.id}.jpg",
+                        data = image,
+                        ) {
+                        upsert = true
+                    }
+                }
+                true
+            }
+        } catch (e: Exception) {
+            throw e
         }
     }
 
-    override suspend fun updatePlant(plant: PlantDto): PlantDto {
-        return withContext(Dispatchers.IO) {
-            postgrest.from("plants").update(
-                {
-                    set("description", plant.description)
-                    set("location", plant.location)
-                    set("photo_url", plant.photo_url)
+    override suspend fun updatePlant(plant: Plant): Boolean {
+        val newPlant = plant.toPlantDto()
+        val image = plant.photo
+        return try {
+            withContext(Dispatchers.IO) {
+                postgrest.from("plants").update(
+                    {
+                        set("description", newPlant.description)
+                        set("location", newPlant.location)
+                        set("name", newPlant.name)
+                    }
+                ) {
+                    select()
+                    filter {
+                        eq("id", newPlant.id)
+                    }
                 }
-            ) {
+
+                if (image != null) {
+                    storage.from("plant_images").update(
+                        path = "${newPlant.user_id}/${plant.id}.png",
+                        data = image,
+                    ) {
+                        upsert = true
+                    }
+                }
+                true
+            }
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun deletePlant(plantId: String): Boolean {
+        return try {
+            postgrest.from("plants").delete {
                 select()
                 filter {
-                    eq("id", plant.id)
+                    eq("id", plantId)
                 }
-            }.decodeSingle<PlantDto>()
+            }
+            true
+        } catch (e: Exception) {
+            throw e
         }
     }
 
-    override suspend fun deletePlant(plantId: String): PlantDto {
-        return postgrest.from("plants").delete {
-            select()
-            filter {
-                eq("id", plantId)
-            }
-        }.decodeSingle<PlantDto>()
+    fun getUserId(): String {
+        return auth.currentUserOrNull()?.id ?: ""
     }
+
+    private fun constructImageUrl(fileName: String): String =
+        "${BuildConfig.SUPABASE_URL}/storage/v1/s3" +
+                auth.currentUserOrNull()?.id.toString() +
+                fileName
 }

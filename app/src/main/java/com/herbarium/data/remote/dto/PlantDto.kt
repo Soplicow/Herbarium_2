@@ -10,11 +10,11 @@ data class PlantDto(
     @SerialName("id")
     val id: String,
 
+    @SerialName("name")
+    val name: String,
+
     @SerialName("user_id")
     val user_id: String,
-
-    @SerialName("photo_url")
-    val photo_url: String,
 
     @SerialName("description")
     val description: String?,
