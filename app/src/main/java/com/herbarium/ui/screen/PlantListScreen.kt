@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
@@ -44,6 +45,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.herbarium.data.model.Plant
+import com.herbarium.ui.navigation.PlantDetailDestination
 import com.herbarium.ui.theme.HerbariumTheme
 import com.herbarium.viewmodel.PlantListViewModel
 import kotlin.random.Random
@@ -56,7 +58,6 @@ fun PlantListScreen(
     viewModel: PlantListViewModel = hiltViewModel(),
 ) {
     val plantList = viewModel.plantList.collectAsState(initial = listOf()).value
-
     val isLoading by viewModel.isLoading.collectAsState(initial = false)
 
     Scaffold(
@@ -65,6 +66,13 @@ fun PlantListScreen(
             TopAppBar(
                 title = { Text("Plants") },
                 actions = {
+                    IconButton(onClick = { navController.navigate("sign_up") }) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Login"
+                        )
+                    }
+
                     IconButton(onClick = { viewModel.getPlants() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
@@ -101,7 +109,13 @@ fun PlantListScreen(
                 ) { _, plant ->
                     PlantListItem(
                         plant = plant,
-                        onEditClick = { /* Handle edit navigation */ }
+                        onEditClick = {
+                            navController.navigate(
+                                PlantDetailDestination.createRouteWithParam(
+                                    plantId = plant.id,
+                                )
+                            )
+                        }
                     )
                 }
             }

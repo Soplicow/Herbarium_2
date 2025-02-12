@@ -32,9 +32,11 @@ class PlantListViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.emit(true)
 
-            val user = authRepository.getCurrentUserUid()
-            val plants = plantRepository.getDomainPlants(user)
-            _plantList.emit(plants)
+            if (authRepository.isLoggedIn()) {
+                val user = authRepository.getCurrentUserUid()
+                val plants = plantRepository.getDomainPlants(user)
+                _plantList.emit(plants)
+            }
 
             _isLoading.emit(false)
         }

@@ -48,7 +48,7 @@ import com.herbarium.viewmodel.AddPlantViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddProductScreen(
+fun AddPlantScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     viewModel: AddPlantViewModel = hiltViewModel(),

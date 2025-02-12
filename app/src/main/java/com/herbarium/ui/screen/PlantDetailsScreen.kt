@@ -49,8 +49,10 @@ import com.herbarium.viewmodel.PlantDetailsViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlantDetailsScreen(
+    modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: PlantDetailsViewModel = hiltViewModel()
+    viewModel: PlantDetailsViewModel = hiltViewModel(),
+    plantId: String?,
 ) {
     val plant by viewModel.plant.collectAsState(initial = null)
     val name by viewModel.name.collectAsState(initial = "")
@@ -59,6 +61,8 @@ fun PlantDetailsScreen(
     val longitude by viewModel.longitude.collectAsState(initial = "")
     val image by viewModel.image.collectAsState(initial = "")
     val context = LocalContext.current
+
+    val isLoading by viewModel.isLoading.collectAsState(initial = true)
 
     Scaffold(
         topBar = {
@@ -83,7 +87,7 @@ fun PlantDetailsScreen(
             )
         }
     ) { innerPadding ->
-        if (plant == null) {
+        if (isLoading) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -167,6 +171,9 @@ fun PlantDetailsScreen(
 @Composable
 fun PreviewPlantDetailsScreen() {
     MaterialTheme {
-        PlantDetailsScreen(navController = rememberNavController())
+        PlantDetailsScreen(
+            navController = rememberNavController(),
+            plantId = "1"
+        )
     }
 }

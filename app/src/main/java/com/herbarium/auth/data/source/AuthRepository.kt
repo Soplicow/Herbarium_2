@@ -59,4 +59,8 @@ class AuthRepository @Inject constructor(
     fun getCurrentUserUid(): String {
         return auth.currentUserOrNull()?.id?: ""
     }
+
+    fun isLoggedIn(): Boolean {
+        return auth.currentUserOrNull()!=null
+    }
 }

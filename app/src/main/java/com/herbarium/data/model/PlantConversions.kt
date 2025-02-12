@@ -37,7 +37,7 @@ fun Plant.toPlantDto(): PlantDto {
     )
 }
 
-fun PlantDto.toPlant(image: ByteArray): Plant {
+fun PlantDto.toPlant(image: ByteArray?): Plant {
     return Plant(
         id = this.id,
         name = this.name,

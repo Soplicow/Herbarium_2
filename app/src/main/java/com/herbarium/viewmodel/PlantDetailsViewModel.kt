@@ -47,8 +47,13 @@ class PlantDetailsViewModel @Inject constructor(
     private val _image = MutableStateFlow<ByteArray?>(null)
     val image: Flow<ByteArray?> = _image
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: Flow<Boolean> = _isLoading
+
     init {
         val plantId = savedStateHandle.get<String>(PlantDetailDestination.plantId)
+        print(plantId)
+        println(plantId)
         plantId?.let {
             getPlant(plantId)
         }
@@ -56,6 +61,8 @@ class PlantDetailsViewModel @Inject constructor(
 
     private fun getPlant(plantId: String) {
         viewModelScope.launch {
+            _isLoading.emit(true)
+
             val result = plantRepository.getPlantById(plantId)
             _plant.emit(result)
             _name.emit(result?.name ?: "" )
@@ -64,6 +71,8 @@ class PlantDetailsViewModel @Inject constructor(
             _latitude.emit(result?.location?.get("latitude").toString())
             _longitude.emit(result?.location?.get("longitude").toString())
             _image.emit(result?.photo)
+
+            _isLoading.emit(false)
         }
     }
 
@@ -94,6 +103,8 @@ class PlantDetailsViewModel @Inject constructor(
     @OptIn(SupabaseInternal::class)
     fun onSavePlant() {
         viewModelScope.launch {
+            _isLoading.emit(true)
+
             _plant.value?.copy(
                 name = _name.value,
                 description = _description.value,
@@ -104,6 +115,8 @@ class PlantDetailsViewModel @Inject constructor(
                     plant = it
                 )
             }
+
+            _isLoading.emit(false)
         }
     }
 

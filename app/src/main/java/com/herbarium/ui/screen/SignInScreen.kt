@@ -8,12 +8,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -45,10 +49,20 @@ fun SignInScreen(
     val password by viewModel.password.collectAsState(initial = "")
     val context = LocalContext.current
 
+    val currentUser by viewModel.currentUser
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Sign In") }
+                title = { Text("Sign In") },
+                actions = {
+                    IconButton(onClick = { navController.navigate("plant_list") }) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Plant List"
+                        )
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -60,6 +74,14 @@ fun SignInScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            currentUser?.let { user ->
+                Text(
+                    text = "Currently logged in: ${user.email}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
             // Email Input
             OutlinedTextField(
                 value = email,
