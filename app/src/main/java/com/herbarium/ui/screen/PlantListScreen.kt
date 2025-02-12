@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -59,6 +61,8 @@ fun PlantListScreen(
 ) {
     val plantList = viewModel.plantList.collectAsState(initial = listOf()).value
     val isLoading by viewModel.isLoading.collectAsState(initial = false)
+
+    val context = LocalContext.current
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -115,6 +119,9 @@ fun PlantListScreen(
                                     plantId = plant.id,
                                 )
                             )
+                        },
+                        onPdfClick = {
+                            viewModel.exportPlantToPdf(plant, context)
                         }
                     )
                 }
@@ -126,7 +133,8 @@ fun PlantListScreen(
 @Composable
 private fun PlantListItem(
     plant: Plant,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    onPdfClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -147,8 +155,7 @@ private fun PlantListItem(
                         .build(),
                     contentDescription = "Plant image",
                     modifier = Modifier
-                        .size(64.dp)
-                        .background(Color.DarkGray),
+                        .size(64.dp),
                     contentScale = ContentScale.Fit
                 )
             } ?: run {
@@ -165,11 +172,20 @@ private fun PlantListItem(
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleMedium
             )
-            IconButton(onClick = onEditClick) {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = "Plant Details",
-                )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                IconButton(onClick = onPdfClick) {
+                    Icon(
+                        imageVector = Icons.Filled.Share,
+                        contentDescription = "Export to PDF",
+                    )
+                }
+                IconButton(onClick = onEditClick) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "Plant Details",
+                    )
+                }
             }
         }
     }
@@ -239,7 +255,8 @@ fun PreviewPlantListItem() {
     HerbariumTheme {
         PlantListItem(
             plant = plant,
-            onEditClick = {}
+            onEditClick = {},
+            onPdfClick = TODO()
         )
     }
 }

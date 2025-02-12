@@ -54,14 +54,13 @@ class PlantRepository @Inject constructor (
 
     suspend fun getDomainPlants(userId: String): List<Plant> {
         return getPlantsByUser(userId).listPlants()
-    } // TODO: This will probably break, but worth a try
+    }
 
-    suspend fun getPlantById(plantId: String): Plant? {
+    suspend fun getPlantById(plantId: String): Plant? = coroutineScope {
         val image: ByteArray
-        val plant: Plant?
         withContext(Dispatchers.IO) {
             val plantDto = postgrest.from("plants")
-               .select {
+                .select {
                     filter {
                         eq("id", plantId)
                     }
@@ -70,14 +69,15 @@ class PlantRepository @Inject constructor (
 
             if (plantDto != null) {
                 try {
-                    image = storage.from("plant_images").downloadAuthenticated(
-                        path = "${plantDto.user_id}/${plantDto.id}.png",
-                    )
-                    plant = plantDto.toPlant(image)
-                    return@withContext plant
+                    image = storage.from("plant_images")
+                        .downloadAuthenticated(
+                            "${plantDto.user_id}/${plantDto.id}.jpg"
+                        )
+                    return@withContext plantDto.toPlant(image)
+
                 } catch (e: NotFoundRestException) {
                     when (e) {
-                        e -> plantDto.toPlant(null)
+                        e -> return@withContext plantDto.toPlant(null)
                         else -> throw e
                     }
                 }
@@ -85,7 +85,6 @@ class PlantRepository @Inject constructor (
                 return@withContext null
             }
         }
-        return null
     }
 
     override suspend fun insertPlant(plant: Plant): Boolean {
@@ -111,19 +110,20 @@ class PlantRepository @Inject constructor (
         }
     }
 
-    override suspend fun updatePlant(plant: Plant): Boolean {
+    override suspend fun updatePlant(plant: Plant) {
         val newPlant = plant.toPlantDto()
+        println("new plant id " + newPlant.id)
+        println("new plant name " + newPlant.name)
         val image = plant.photo
-        return try {
+        try {
             withContext(Dispatchers.IO) {
                 postgrest.from("plants").update(
                     {
                         set("description", newPlant.description)
-                        set("location", newPlant.location)
+                        Plant::location setTo newPlant.location
                         set("name", newPlant.name)
                     }
                 ) {
-                    select()
                     filter {
                         eq("id", newPlant.id)
                     }
@@ -131,13 +131,12 @@ class PlantRepository @Inject constructor (
 
                 if (image != null) {
                     storage.from("plant_images").update(
-                        path = "${newPlant.user_id}/${plant.id}.png",
+                        path = "${newPlant.user_id}/${newPlant.id}.jpg",
                         data = image,
                     ) {
                         upsert = true
                     }
                 }
-                true
             }
         } catch (e: Exception) {
             throw e

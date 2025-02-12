@@ -59,7 +59,7 @@ fun PlantDetailsScreen(
     val description by viewModel.description.collectAsState(initial = "")
     val latitude by viewModel.latitude.collectAsState(initial = "")
     val longitude by viewModel.longitude.collectAsState(initial = "")
-    val image by viewModel.image.collectAsState(initial = "")
+    val image by viewModel.image.collectAsState(initial = null)
     val context = LocalContext.current
 
     val isLoading by viewModel.isLoading.collectAsState(initial = true)
@@ -117,9 +117,9 @@ fun PlantDetailsScreen(
                         .fillMaxWidth()
                         .height(200.dp)
                         .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.Fit,
                     placeholder = painterResource(R.drawable.ic_launcher_background),
-                    error = painterResource(R.drawable.ic_launcher_background)
+                    error = painterResource(R.drawable.ic_launcher_foreground)
                 )
 
                 // Plant Name
@@ -151,7 +151,6 @@ fun PlantDetailsScreen(
                     onValueChange = viewModel::onLatitudeChange,
                     label = { Text("Latitude") },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
                 // Longitude
@@ -160,7 +159,6 @@ fun PlantDetailsScreen(
                     onValueChange = viewModel::onLongitudeChange,
                     label = { Text("Longitude") },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }
         }
