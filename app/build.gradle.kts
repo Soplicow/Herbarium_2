@@ -96,6 +96,8 @@ dependencies {
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.accompanist.swiperefresh)
     implementation(libs.coil.compose)
+    implementation(libs.play.services.location)
+    implementation(libs.accompanist.permissions)
 
     // Hilt
     implementation(libs.hilt.android)

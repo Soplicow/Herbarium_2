@@ -8,20 +8,26 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,6 +35,8 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import com.herbarium.ui.composables.RequestLocationPermission
 import com.herbarium.viewmodel.AddPlantViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,11 +62,17 @@ fun AddPlantScreen(
     navController: NavController,
     viewModel: AddPlantViewModel = hiltViewModel(),
 ) {
-    var plantName by rememberSaveable { mutableStateOf("") }
-    var plantDescription by rememberSaveable { mutableStateOf("") }
-    var longitude by rememberSaveable { mutableStateOf("") }
-    var latitude by rememberSaveable { mutableStateOf("") }
+    val plantName by viewModel.plantName.collectAsState("")
+    val plantDescription by viewModel.plantDescription.collectAsState("")
+    val longitude by viewModel.longitude.collectAsState("")
+    val latitude by viewModel.latitude.collectAsState("")
+
     var plantImageUri by rememberSaveable(stateSaver = UriSaver) { mutableStateOf(null) }
+    LaunchedEffect(plantImageUri) {
+        plantImageUri?.let { uri ->
+            viewModel.onPlantPhotoChange(uri)
+        }
+    }
 
     var showError by remember { mutableStateOf(false) }
 
@@ -162,7 +177,7 @@ fun AddPlantScreen(
                 PlantInputField(
                     label = "Plant Name",
                     value = plantName,
-                    onValueChange = { plantName = it },
+                    onValueChange = viewModel::onPlantNameChange,
                     isError = showError && plantName.isBlank(),
                     errorMessage = "Plant name is required"
                 )
@@ -172,26 +187,44 @@ fun AddPlantScreen(
                 PlantInputField(
                     label = "Description",
                     value = plantDescription,
-                    onValueChange = { plantDescription = it },
+                    onValueChange = viewModel::onPlantDescriptionChange,
                 )
             }
 
             item {
-                PlantInputField(
-                    label = "Longitude",
-                    value = longitude,
-                    onValueChange = { longitude = it },
-                    singleLine = false,
-                )
-            }
+                // Location Section
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Location",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
-            item {
-                PlantInputField(
-                    label = "Latitude",
-                    value = latitude,
-                    onValueChange = { latitude = it },
-                    singleLine = false,
-                )
+                    RequestLocationPermission(
+                        viewModel = viewModel,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Latitude and Longitude Fields
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = latitude,
+                            onValueChange = viewModel::onLatitudeChange,
+                            label = { Text("Latitude") },
+                            modifier = Modifier.weight(1f),
+                        )
+
+                        OutlinedTextField(
+                            value = longitude,
+                            onValueChange = viewModel::onLongitudeChange,
+                            label = { Text("Longitude") },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
             }
         }
     }

@@ -27,6 +27,9 @@ class PlantDetailsViewModel @Inject constructor(
 
     private val _name = MutableStateFlow("")
     val name: Flow<String> = _name
+    fun onNameChange(name: String) {
+        _name.value = name
+    }
 
     private val _description = MutableStateFlow("")
     val description: Flow<String> = _description
@@ -100,10 +103,6 @@ class PlantDetailsViewModel @Inject constructor(
                 _isLoading.emit(false)
             }
         }
-    }
-
-    fun onNameChange(name: String) {
-        _name.value = name
     }
 
     fun onDescriptionChange(description: String) {

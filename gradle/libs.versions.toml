@@ -22,6 +22,7 @@ composeBom = "2024.04.01"
 material = "1.7.7"
 mockk = "1.13.8"
 mockkAndroid = "1.10.0"
+playServicesLocation = "21.3.0"
 roomCommon = "2.6.1"
 roomCompiler = "2.6.1"
 roomKtx = "2.6.1"
@@ -38,6 +39,7 @@ navigationRuntimeKtx = "2.8.6"
 firebaseStorageKtx = "21.0.1"
 
 [libraries]
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistSwiperefresh" }
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanistSwiperefresh" }
 androidx-core = { module = "androidx.test:core", version.ref = "rules" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -80,6 +82,7 @@ mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockk-agent = { module = "io.mockk:mockk-agent" }
 mockk-android = { module = "io.mockk:mockk-android" }
 mockk-mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
 storage-kt = { module = "io.github.jan-tennert.supabase:storage-kt" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
