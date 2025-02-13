@@ -12,15 +12,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.herbarium.util.CameraUtil
 import java.io.File
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 @Composable
 fun CameraScreen(navController: NavController) {
@@ -101,10 +98,8 @@ fun takePicture(navController: NavController, imageCapture: ImageCapture?, conte
                 val savedUri = outputFileResults.savedUri ?: Uri.fromFile(photoFile)
                 Log.d("CameraScreen", "Photo saved: $savedUri")
 
-                // Pass the captured image URI to AddPlantScreen
                 navController.previousBackStackEntry?.savedStateHandle?.set("photoUri", savedUri.toString())
 
-                // Navigate back
                 navController.popBackStack()
             }
 

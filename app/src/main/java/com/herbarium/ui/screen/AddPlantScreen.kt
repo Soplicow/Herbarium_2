@@ -81,7 +81,6 @@ fun AddPlantScreen(
     val longitude by viewModel.longitude.collectAsState("")
     val latitude by viewModel.latitude.collectAsState("")
 
-    //var plantImageUri by rememberSaveable(stateSaver = UriSaver) { mutableStateOf(null) }
     LaunchedEffect(plantImageUri) {
         plantImageUri?.let { uri ->
             viewModel.onPlantPhotoChange(uri)
@@ -151,16 +150,6 @@ fun AddPlantScreen(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .height(200.dp)
-//                            .clip(MaterialTheme.shapes.medium)
-//                            .background(MaterialTheme.colorScheme.surfaceVariant)
-//                            .clickable { galleryLauncher.launch("image/*") }
-//                            .align(Alignment.CenterHorizontally)
-//                    )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
@@ -173,26 +162,8 @@ fun AddPlantScreen(
                             Text("Take Photo")
                         }
                     }
-//                        {
-//                        if (plantImageUri != null) {
-//                            // Display selected image
-//                            AsyncImage(
-//                                model = plantImageUri,
-//                                contentDescription = "Selected plant image",
-//                                modifier = Modifier.fillMaxSize(),
-//                                contentScale = ContentScale.Crop
-//                            )
-//                        } else {
-//                            Text(
-//                                text = "Tap to add photo",
-//                                modifier = Modifier.padding(10.dp),
-//                                style = MaterialTheme.typography.bodySmall
-//                            )
-//                        }
-//                    }
                 }
             }
-
             item {
                 PlantInputField(
                     label = "Plant Name",
