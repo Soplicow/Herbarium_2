@@ -37,3 +37,8 @@ object SignUpDestination : Destination {
     override val route = "sign_up"
     override val title = "Sign Up"
 }
+
+object CameraDestination : Destination {
+    override val route = "camera"
+    override val title = "Camera"
+}

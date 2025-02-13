@@ -14,10 +14,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.herbarium.ui.navigation.AddPlantDestination
 import com.herbarium.ui.navigation.AuthenticationDestination
+import com.herbarium.ui.navigation.CameraDestination
 import com.herbarium.ui.navigation.PlantDetailDestination
 import com.herbarium.ui.navigation.PlantListDestination
 import com.herbarium.ui.navigation.SignUpDestination
 import com.herbarium.ui.screen.AddPlantScreen
+import com.herbarium.ui.screen.CameraScreen
 import com.herbarium.ui.screen.PlantDetailsScreen
 import com.herbarium.ui.screen.PlantListScreen
 import com.herbarium.ui.screen.SignInScreen
@@ -66,6 +68,11 @@ class MainActivity : ComponentActivity() {
 
                         composable(AddPlantDestination.route) {
                             AddPlantScreen(
+                                navController = navController
+                            )
+                        }
+                        composable(CameraDestination.route) {
+                            CameraScreen(
                                 navController = navController
                             )
                         }

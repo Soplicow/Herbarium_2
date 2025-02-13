@@ -96,6 +96,15 @@ fun PlantListScreen(
                     contentDescription = "Add Plant"
                 )
             }
+//            FloatingActionButton(
+//                onClick = { navController.navigate("...") },
+//                modifier = Modifier.padding(16.dp)
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Default.,
+//                    contentDescription = "Take a picture"
+//                )
+//            }
         }
     ) { innerPadding ->
         if (plantList?.isEmpty() == true) {

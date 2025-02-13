@@ -62,12 +62,26 @@ fun AddPlantScreen(
     navController: NavController,
     viewModel: AddPlantViewModel = hiltViewModel(),
 ) {
+//    var plantName by rememberSaveable { mutableStateOf("") }
+//    var plantDescription by rememberSaveable { mutableStateOf("") }
+//    var longitude by rememberSaveable { mutableStateOf("") }
+//    var latitude by rememberSaveable { mutableStateOf("") }
+//    //var plantImageUri by rememberSaveable(stateSaver = UriSaver) { mutableStateOf(null) }
+    var plantImageUri by rememberSaveable(stateSaver = UriSaver) { mutableStateOf<Uri?>(null) }
+    LaunchedEffect(navController.currentBackStackEntry) {
+        navController.currentBackStackEntry
+            ?.savedStateHandle
+            ?.get<String>("photoUri")
+            ?.let { uriString ->
+                plantImageUri = Uri.parse(uriString)
+            }
+    }
     val plantName by viewModel.plantName.collectAsState("")
     val plantDescription by viewModel.plantDescription.collectAsState("")
     val longitude by viewModel.longitude.collectAsState("")
     val latitude by viewModel.latitude.collectAsState("")
 
-    var plantImageUri by rememberSaveable(stateSaver = UriSaver) { mutableStateOf(null) }
+    //var plantImageUri by rememberSaveable(stateSaver = UriSaver) { mutableStateOf(null) }
     LaunchedEffect(plantImageUri) {
         plantImageUri?.let { uri ->
             viewModel.onPlantPhotoChange(uri)
@@ -138,38 +152,44 @@ fun AddPlantScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable { galleryLauncher.launch("image/*") }
-                            .align(Alignment.CenterHorizontally)
+//                    Box(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .height(200.dp)
+//                            .clip(MaterialTheme.shapes.medium)
+//                            .background(MaterialTheme.colorScheme.surfaceVariant)
+//                            .clickable { galleryLauncher.launch("image/*") }
+//                            .align(Alignment.CenterHorizontally)
+//                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        if (plantImageUri != null) {
-                            // Display selected image
-                            AsyncImage(
-                                model = plantImageUri,
-                                contentDescription = "Selected plant image",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            // Placeholder for image selection
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Select image",
-                                modifier = Modifier.size(48.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "Tap to add photo",
-                                modifier = Modifier.padding(top = 8.dp),
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                        Button(onClick = { galleryLauncher.launch("image/*") }) {
+                            Text("Choose from Gallery")
+                        }
+
+                        Button(onClick = { navController.navigate("camera") }) {
+                            Text("Take Photo")
                         }
                     }
+//                        {
+//                        if (plantImageUri != null) {
+//                            // Display selected image
+//                            AsyncImage(
+//                                model = plantImageUri,
+//                                contentDescription = "Selected plant image",
+//                                modifier = Modifier.fillMaxSize(),
+//                                contentScale = ContentScale.Crop
+//                            )
+//                        } else {
+//                            Text(
+//                                text = "Tap to add photo",
+//                                modifier = Modifier.padding(10.dp),
+//                                style = MaterialTheme.typography.bodySmall
+//                            )
+//                        }
+//                    }
                 }
             }
 
